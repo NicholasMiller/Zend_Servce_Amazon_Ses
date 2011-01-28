@@ -21,7 +21,7 @@
  */
 
 /**
- * Amazon SES Send Email Response
+ * Amazon SES ListVerifiedEmailAddresses Result
  *
  * @category   Zend
  * @package    Zend_Service
@@ -29,19 +29,37 @@
  * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Amazon_Ses_Response_SendRawEmail extends
-    Zend_Service_Amazon_Ses_Response_SendEmail
+class Zend_Service_Amazon_Ses_Response_ListVerifiedEmailAddresses extends
+    Zend_Service_Amazon_Ses_Response_Abstract
 {
+
+    /**
+     * @var array
+     */
+    protected $_emailAddresses;
+
+    /**
+     * Returns an array of email addresses which have been verified with SES
+     * @return array
+     */
+    public function getEmailAddresses()
+    {
+        return $this->_emailAddresses;
+    }
+
     /**
      * Parses the AWS XML response
      * @param  SimpleXMLElement $xml
-     * @return Zend_Service_Amazon_Ses_Response_SendRawEmail
+     * @return Zend_Service_Amazon_Ses_Response_VerifyEmailAddress
      */
     public function buildFromXml(SimpleXMLElement $xml)
     {
-        $this->setMessageId(
-            (string)$xml->SendRawEmailResult->MessageId
-        )->setRequestId(
+        $xml->registerXPathNamespace('ses', 'http://ses.amazonaws.com/doc/2010-12-01/');
+        foreach ($xml->xpath('//ses:member') as $member) {
+            $this->_emailAddresses[] = (string)$member;
+        }
+
+        $this->setRequestId(
             (string)$xml->ResponseMetadata->RequestId
         );
 

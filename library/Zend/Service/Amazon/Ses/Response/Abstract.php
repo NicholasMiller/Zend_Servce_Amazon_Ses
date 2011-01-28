@@ -32,6 +32,32 @@
 abstract class Zend_Service_Amazon_Ses_Response_Abstract
 {
     /**
+     * @var string
+     */
+    protected $_requestId;
+
+    /**
+     * Gets the AWS Request Id
+     * @return string
+     */
+    public function getRequestId()
+    {
+        return $this->_requestId;
+    }
+
+    /**
+     * Sets the AWS Request Id
+     * @param string $requestId
+     * @return Zend_Service_Amazon_Ses_Response_Abstract
+     */
+    public function setRequestId($requestId)
+    {
+        $this->_requestId = $requestId;
+        return $this;
+    }
+
+
+    /**
      * Assembles the data in the AWS response.
      * Each response will have serparate data to parse.
      * @return Zend_Service_Amazon_Ses_Response_Abstract

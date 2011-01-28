@@ -15,13 +15,13 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Amazon
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id: $
  */
 
 /**
- * Amazon SES Send Email Response
+ * Amazon SES VerifyEmailAddress Operation Class
  *
  * @category   Zend
  * @package    Zend_Service
@@ -29,22 +29,14 @@
  * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Amazon_Ses_Response_SendRawEmail extends
-    Zend_Service_Amazon_Ses_Response_SendEmail
+class Zend_Service_Amazon_Ses_ListVerifiedEmailAddresses extends Zend_Service_Amazon_Ses_Abstract
 {
     /**
-     * Parses the AWS XML response
-     * @param  SimpleXMLElement $xml
+     * Performs the request
      * @return Zend_Service_Amazon_Ses_Response_SendRawEmail
      */
-    public function buildFromXml(SimpleXMLElement $xml)
+    public function request()
     {
-        $this->setMessageId(
-            (string)$xml->SendRawEmailResult->MessageId
-        )->setRequestId(
-            (string)$xml->ResponseMetadata->RequestId
-        );
-
-        return $this;
+        return $this->_sendRequest(array());
     }
 }

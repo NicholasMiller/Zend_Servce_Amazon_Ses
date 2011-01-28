@@ -29,19 +29,17 @@
  * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Amazon_Ses_Response_SendRawEmail extends
-    Zend_Service_Amazon_Ses_Response_SendEmail
+class Zend_Service_Amazon_Ses_Response_VerifyEmailAddress extends
+    Zend_Service_Amazon_Ses_Response_Abstract
 {
     /**
      * Parses the AWS XML response
      * @param  SimpleXMLElement $xml
-     * @return Zend_Service_Amazon_Ses_Response_SendRawEmail
+     * @return Zend_Service_Amazon_Ses_Response_VerifyEmailAddress
      */
     public function buildFromXml(SimpleXMLElement $xml)
     {
-        $this->setMessageId(
-            (string)$xml->SendRawEmailResult->MessageId
-        )->setRequestId(
+        $this->setRequestId(
             (string)$xml->ResponseMetadata->RequestId
         );
 

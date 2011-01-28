@@ -42,27 +42,6 @@ class Zend_Service_Amazon_Ses_Response_SendEmail extends
      */
     protected $_messageId;
 
-
-    /**
-     * Gets the AWS Request Id
-     * @return string
-     */
-    public function getRequestId()
-    {
-        return $this->_requestId;
-    }
-
-    /**
-     * Sets the AWS Request Id
-     * @param string $requestId
-     * @return Zend_Service_Amazon_Ses_Response_SendEmail
-     */
-    public function setRequestId($requestId)
-    {
-        $this->_requestId = $requestId;
-        return $this;
-    }
-
     /**
      * Gets the AWS Message Id
      * @return string
@@ -91,9 +70,9 @@ class Zend_Service_Amazon_Ses_Response_SendEmail extends
     public function buildFromXml(SimpleXMLElement $xml)
     {
         $this->setMessageId(
-            $xml->SendEmailResult->MessageId
+            (string)$xml->SendEmailResult->MessageId
         )->setRequestId(
-            $xml->ResponseMetadata->RequestId
+            (string)$xml->ResponseMetadata->RequestId
         );
 
         return $this;
