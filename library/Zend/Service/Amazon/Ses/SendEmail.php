@@ -91,7 +91,7 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
      * Returns all the TO recipients
      * @return array
      */
-    public function getRecipients()
+    public function getTo()
     {
         return $this->_toRecipients;
     }
@@ -102,7 +102,7 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
      * @param  string $name
      * @return Zend_Service_Amazon_Ses_SendEmail
      */
-    public function addRecipient($email, $name = null)
+    public function addTo($email, $name = null)
     {
         $this->_addEmail($email, $name, 'to');
         return $this;
@@ -112,7 +112,7 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
      * Gets registered CC addresses
      * @return array
      */
-    public function getCcRecipients()
+    public function getCc()
     {
         return $this->_ccRecipients;
     }
@@ -123,7 +123,7 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
      * @param  string $name
      * @return Zend_Service_Amazon_Ses_SendEmail
      */
-    public function addCcRecipient($email, $name = null)
+    public function addCc($email, $name = null)
     {
         $this->_addEmail($email, $name, 'cc');
         return $this;
@@ -133,7 +133,7 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
      * Gets the BCC email addresses
      * @return array
      */
-    public function getBccRecipients()
+    public function getBcc()
     {
         return $this->_bccRecipients;
     }
@@ -145,7 +145,7 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
      * @param  string $name
      * @return Zend_Service_Amazon_Ses_SendEmail
      */
-    public function addBccRecipient($email, $name = null)
+    public function addBcc($email, $name = null)
     {
         $this->_addEmail($email, $name, 'bcc');
         return $this;
