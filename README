@@ -1,0 +1,17 @@
+Zend_Service_Amazon_Ses
+
+Incubator for development of a new Simple Email Services component.
+
+Usage:
+
+SendEmail:
+
+$sendEmail = new Zend_Service_Amazon_Ses_SendEmail(
+    'awskey', 'aws-secret-key'
+);
+
+$ses->addTo('to-address@domain.tld', 'Some User')
+    ->setSource('from-email@example.com')
+    ->setSubject('This is a message')
+    ->setBody('Boom Boom Boom!!!')
+    ->request();
