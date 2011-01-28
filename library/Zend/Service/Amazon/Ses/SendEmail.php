@@ -184,7 +184,6 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
 
     }
 
-
     /**
      * Clears all recipients
      * @return void
@@ -235,10 +234,10 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
     }
 
     /**
-     *
-     * @
+     * Performs a request to AWS with all data supplied
+     * @return Zend_Service_Amazon_Ses_Response_SendEmail
      */
-    public function process()
+    public function request()
     {
         $params = array(
             'Source' => $this->_source,
@@ -246,14 +245,15 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
             'Message.Body.Text.Data' => $this->getBody()
         );
 
-        $params = array_merge($params, $this->_parameterizeRecipients($this->_toRecipients, 'To'));
+        $params = array_merge(
+            $params, $this->_parameterizeRecipients($this->_toRecipients, 'To')
+        );
 
-        $this->_sendRequest($params);
+        return $this->_sendRequest($params);
     }
    
     /**
      * Converts array of recipients into format compatable for the SendEmail action
-     * 
      * @param  array $recipients array of RFC822-compliant email address
      * @throws Zend_Service_Amazon_Ses_Exception if $type is not one of to, cc, bcc
      * @return array

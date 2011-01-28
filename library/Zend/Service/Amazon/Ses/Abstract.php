@@ -69,9 +69,9 @@ abstract class Zend_Service_Amazon_Ses_Abstract extends Zend_Service_Amazon_Abst
 
     /**
      * The method that puts everything in motion
-     * @return void
+     * @return Zend_Service_Amazon_Ses_Response_Abstract
      */
-    abstract public function process();
+    abstract public function request();
 
     /**
      * Adds the required headers to the Http Client
@@ -134,37 +134,12 @@ abstract class Zend_Service_Amazon_Ses_Abstract extends Zend_Service_Amazon_Abst
             $client->setMethod(Zend_Http_Client::POST);
             $client->setParameterPost($params);
 
-
-
-
-            $response = $this->_parseResponse($client->request());
-
-            if ($response->isError()) {
-                throw new Zend_Service_Amazon_Ses_Exception(
-                    $response->getErrorMessage(),
-                    $response->getErrorCode()
-                );
-            }
-
-            return $response;
-
+            return Zend_Service_Amazon_Ses_Response::factory(
+                $this->_action, $client->request()
+            );
         } catch (Zend_Http_Client_Exception $e) {
             $message = 'Error in request to AWS service: ' . $e->getMessage();
             throw new Zend_Service_Amazon_Ses_Exception($message, $e->getCode(), $e);
         }
     }
-
-    /**
-     * Converts the raw response from the aws server into a usable object.
-     * 
-     * @param  Zend_Http_Response $response
-     * @return Zend_Service_Amazon_Ses_Response
-     */
-    protected function _parseResponse(Zend_Http_Response $response)
-    {
-        
-        
-        
-    }
-
 }
