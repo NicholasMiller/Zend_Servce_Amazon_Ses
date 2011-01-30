@@ -246,7 +246,7 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
         );
 
         $params = array_merge(
-            $params, $this->_parameterizeRecipients($this->_toRecipients, 'To')
+            $params, $this->_parameterizeRecipients()
         );
 
         return $this->_sendRequest($params);
@@ -254,24 +254,17 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
    
     /**
      * Converts array of recipients into format compatable for the SendEmail action
-     * @param  array $recipients array of RFC822-compliant email address
-     * @throws Zend_Service_Amazon_Ses_Exception if $type is not one of to, cc, bcc
      * @return array
      */
-    protected function _parameterizeRecipients(array $recipients, $type)
+    protected function _parameterizeRecipients()
     {
-        $type = strtolower($type);
-
-        if (!in_array($type, array('to', 'cc', 'bcc'))) {
-            throw new Zend_Service_Amazon_Ses_Exception(
-                '$type must be one of to, cc, or bcc'
-            );
-        }
-
         $params = array();
-        foreach (array_values($recipients) as $k => $r) {
-            $key = 'Destination.' . ucfirst(strtolower($type)) . 'Addresses.member.' . ($k + 1);
-            $params[$key] = $r;
+        foreach (array('To', 'Cc', 'Bcc') as $part) {
+            $method = 'get' . $part;
+            foreach ($this->$method() as $k => $r) {
+                $key = 'Destination.' . $part . 'Addresses.member.' . ($k + 1);
+                $params[$key] = $r;
+            }
         }
 
         return $params;
