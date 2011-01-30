@@ -221,6 +221,15 @@ class Zend_Service_Amazon_Ses_Email
     }
 
     /**
+     * Clears the reply to addresses.
+     * @return void
+     */
+    public function clearReplyTo()
+    {
+        $this->_replyTo = array();
+    }
+
+    /**
      * Gets registered CC addresses
      * @return array
      */
