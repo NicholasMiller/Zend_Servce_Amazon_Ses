@@ -187,6 +187,15 @@ class Zend_Service_Amazon_Ses_Email
     }
 
     /**
+     * Clears all TO addresses
+     * @return void
+     */
+    public function clearTo()
+    {
+        $this->_to = array();
+    }
+
+    /**
      * Sets the reply-to email address(es) for the message.
      * If the recipient replies to the message, each reply-to address will
      * receive the reply.
@@ -221,6 +230,15 @@ class Zend_Service_Amazon_Ses_Email
     }
 
     /**
+     * Clears CC Addresses
+     * @return void
+     */
+    public function clearCc()
+    {
+        $this->_cc = array();
+    }
+
+    /**
      * Adds the CC address
      * @param  string $email
      * @param  string $name
@@ -252,6 +270,15 @@ class Zend_Service_Amazon_Ses_Email
     {
         $this->_addEmail($email, $name, 'bcc');
         return $this;
+    }
+
+    /**
+     * Clears BCC Addresses
+     * @return void
+     */
+    public function clearBcc()
+    {
+        $this->_bcc = array();
     }
 
     /**
