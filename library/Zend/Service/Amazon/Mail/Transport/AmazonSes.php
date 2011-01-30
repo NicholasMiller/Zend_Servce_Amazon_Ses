@@ -15,92 +15,77 @@
  * @category   Zend
  * @package    Zend_Mail
  * @subpackage Transport
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  * @version    $Id$
  */
 
 /**
- * File transport
+ * Amazon SES Transport
  *
- * Class for saving outgoing emails in filesystem
+ * Sends emails through Amaazons Simple Email Service API
  *
  * @category   Zend
  * @package    Zend_Mail
  * @subpackage Transport
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 class Zend_Mail_Transport_AmazonSes extends Zend_Mail_Transport_Abstract
 {
     /**
-     * @var Zend_Service_Amazon_Ses_SendRawEmail
+     * @var Zend_Service_Amazon_Ses
      */
-    protected $_sesRawEmail;
+    protected $_ses;
 
     /**
-     * @var Zend_Service_Amazon_Ses_SendRawEmail
+     * The message id for the last successfully sent message
+     * @var string
      */
-    protected $_defaultSesRawEmail;
+    protected $_lastMessageId;
 
     /**
      * Constructor
      *
-     * @param
+     * @param  Zend_Service_Amazon_Ses $ses Amazon Simple Email Service Instance
      * @return void
      */
-    public function __construct(Zend_Service_Amazon_Ses_SendRawEmail $sesSendRawEmail = null)
+    public function __construct(Zend_Service_Amazon_Ses $ses)
     {
-        if ($options instanceof Zend_Config) {
-            $options = $options->toArray();
-        } elseif (!is_array($options)) {
-            $options = array();
-        }
-
-        $this->setOptions($options);
+        $this->setSes($ses);
     }
 
     /**
-     * Sets options
-     *
-     * @param  array $options
-     * @return void
+     * Gets the associated Amazon Simple Email Service Instance
+     * @return Zend_Service_Amazon_Ses
      */
-    public function setOptions(array $options)
+    public function getSes()
     {
-        if (isset($options['path'])&& is_dir($options['path'])) {
-            $this->_path = $options['path'];
-        }
-        if (isset($options['callback']) && is_callable($options['callback'])) {
-            $this->_callback = $options['callback'];
-        }
+        return $this->_ses;
     }
 
     /**
-     * Saves e-mail message to a file
+     * Sets an Amazon Simple Email Service Instance
+     * 
+     * @param  Zend_Service_Amazon_Ses $ses
+     * @return Zend_Mail_Transport_AmazonSes
+     */
+    public function setSes(Zend_Service_Amazon_Ses $ses)
+    {
+        $this->_ses = $ses;
+        return $this;
+    }
+
+
+    /**
+     * Passes an email to the Amazon Simple Email Service Object
      *
      * @return void
-     * @throws Zend_Mail_Transport_Exception on not writable target directory
-     * @throws Zend_Mail_Transport_Exception on file_put_contents() failure
      */
     protected function _sendMail()
     {
-        $file = $this->_path . DIRECTORY_SEPARATOR . call_user_func($this->_callback, $this);
-
-        if (!is_writable(dirname($file))) {
-            require_once 'Zend/Mail/Transport/Exception.php';
-            throw new Zend_Mail_Transport_Exception(sprintf(
-                'Target directory "%s" does not exist or is not writable',
-                dirname($file)
-            ));
-        }
-
         $email = $this->header . $this->EOL . $this->body;
-
-        if (!file_put_contents($file, $email)) {
-            require_once 'Zend/Mail/Transport/Exception.php';
-            throw new Zend_Mail_Transport_Exception('Unable to send mail');
-        }
+        $this->_lastMessageId = $this->getSes()->sendRawEmail($email);
     }
 
 
