@@ -29,31 +29,39 @@
  * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
-class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
+class Zend_Service_Amazon_Ses_Email
 {
     /**
      * Source (From) email address
      * @var string
      */
-    protected $_source;
+    protected $_from;
 
     /**
      * To Recipients
      * @var array
      */
-    protected $_toRecipients = array();
+    protected $_to = array();
 
     /**
      * Carbon Copy Recipients
      * @var array
      */
-    protected $_ccRecipients = array();
+    protected $_cc = array();
 
     /**
      * Blind Carbon Copy Recipients
      * @var array
      */
-    protected $_bccRecipients = array();
+    protected $_bcc = array();
+
+    /**
+     * The reply-to email address(es) for the message.
+     * If the recipient replies to the message, each reply-to address will receive the reply.
+     * 
+     * @var array
+     */
+    protected $_replyTo = array();
 
     /**
      * Message Subject
@@ -62,28 +70,98 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
     protected $_subject;
 
     /**
-     * Message Body
+     * Email Text Body
      * @var string
      */
-    protected $_body;
+    protected $_bodyText;
+
+    /**
+     * Sets the charset for the text part of the mail body
+     * @var string
+     */
+    protected $_bodyTextCharset;
+
+    /**
+     * Email HTML Body
+     * @var string
+     */
+    protected $_bodyHtml;
+
+    /**
+     * Sets the charset for the text part of the mail body
+     * @var string
+     */
+    protected $_bodyHtmlCharset;
+
+    /**
+     * Return path email address
+     * @var string
+     */
+    protected $_returnPath;
+
+    /**
+     * Gets the HTML part of the message body
+     * @return string
+     */
+    public function getBodyHtml()
+    {
+        return $this->_bodyHtml;
+    }
+
+    /**
+     * Sets the HTML part of the message body
+     * @param  string $bodyHtml
+     * @param  string $charset (Optional)
+     * @return Zend_Service_Amazon_Ses_Email
+     */
+    public function setBodyHtml($bodyHtml, $charset = 'utf-8')
+    {
+        $this->_bodyHtml = $bodyHtml;
+        $this->_bodyHtmlCharset = $charset;
+        return $this;
+    }
+
+    /**
+     * Gets the Return Path
+     * @return string
+     */
+    public function getReturnPath()
+    {
+        return $this->_returnPath;
+    }
+
+    /**
+     * Sets the Return Path
+     * @param  string $returnPath Email Address
+     * @return Zend_Service_Amazon_Ses
+     */
+    public function setReturnPath($returnPath)
+    {
+        $this->_returnPath = $returnPath;
+        return $this;
+    }
 
     /**
      * Gets the Source (AWS Version of From Email Address)
      * @return string
      */
-    public function getSource()
+    public function getFrom()
     {
-        return $this->_source;
+        return $this->_from;
     }
 
     /**
-     * Sets the Source (AWS Version of From Email Address)
-     * @param string $source
-     * @return Zend_Service_Amazon_Ses_SendEmail
+     * Sets the From Address
+     * @param  string $from RFC-822 Compliant Email Address
+     * @param  string $name
+     * @return Zend_Service_Amazon_Ses
      */
-    public function setSource($source)
+    public function setFrom($from, $name = null)
     {
-        $this->_source = $source;
+        $this->_from = sprintf(
+            '%s<%s>', !empty($name) ? $name . ' ' : '', $from
+        );
+
         return $this;
     }
 
@@ -93,14 +171,14 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
      */
     public function getTo()
     {
-        return $this->_toRecipients;
+        return $this->_to;
     }
 
     /**
      * Add a TO address
      * @param  string $email
      * @param  string $name
-     * @return Zend_Service_Amazon_Ses_SendEmail
+     * @return Zend_Service_Amazon_Ses
      */
     public function addTo($email, $name = null)
     {
@@ -109,19 +187,44 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
     }
 
     /**
+     * Sets the reply-to email address(es) for the message.
+     * If the recipient replies to the message, each reply-to address will
+     * receive the reply.
+     * 
+     * @param  string $email Email Address
+     * @param  string $name (Optional)
+     * @return Zend_Service_Amazon_Ses
+     */
+    public function addReplyTo($email, $name = null)
+    {
+        $this->_addEmail($email, $name, 'replyTo');
+        return $this;
+    }
+
+    /**
+     * Gets the reply-to email address(es) for the message.
+     * 
+     * @return array
+     */
+    public function setReplyTo()
+    {
+        return $this->_replyTo;
+    }
+
+    /**
      * Gets registered CC addresses
      * @return array
      */
     public function getCc()
     {
-        return $this->_ccRecipients;
+        return $this->_cc;
     }
 
     /**
      * Adds the CC address
      * @param  string $email
      * @param  string $name
-     * @return Zend_Service_Amazon_Ses_SendEmail
+     * @return Zend_Service_Amazon_Ses
      */
     public function addCc($email, $name = null)
     {
@@ -135,15 +238,15 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
      */
     public function getBcc()
     {
-        return $this->_bccRecipients;
+        return $this->_bcc;
     }
 
     /**
      * Adds a BCC address
-     * 
+     *
      * @param  string $email
      * @param  string $name
-     * @return Zend_Service_Amazon_Ses_SendEmail
+     * @return Zend_Service_Amazon_Ses
      */
     public function addBcc($email, $name = null)
     {
@@ -161,27 +264,18 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
      */
     protected function _addEmail($email, $name, $part)
     {
-        $part = strtolower($part);
-        if (!in_array($part, array('to', 'cc', 'bcc'))) {
+        if (!in_array($part, array('to', 'cc', 'bcc', 'replyto'))) {
             throw new Zend_Service_Amazon_Ses_Exception(
                 '$part is not one of to, cc, bcc'
             );
         }
 
-        $valid = new Zend_Validate_EmailAddress();
-        if (!$valid->isValid($email)) {
-            throw new Zend_Service_Amazon_Ses_Exception(
-                "$email is not a valid email address"
-            );
-        }
-
-        $property = "_{$part}Recipients";
+        $property = "_{$part}";
         $this->{$property}[] = sprintf(
             '%s<%s>',
             !empty($name) ? $name . ' ' : '',
             $email
         );
-
     }
 
     /**
@@ -190,7 +284,7 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
      */
     public function clearRecipients()
     {
-        $this->_toRecipients = $this->_ccRecipients = $this->_bccRecipients = array();
+        $this->_to = $this->_cc = $this->_bcc = array();
     }
 
     /**
@@ -205,7 +299,7 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
     /**
      * Sets the message subject
      * @param string $subject
-     * @return Zend_Service_Amazon_Ses_SendEmail
+     * @return Zend_Service_Amazon_Ses
      */
     public function setSubject($subject)
     {
@@ -214,44 +308,50 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
     }
 
     /**
-     * Gets the email body
+     * Gets the text part of the mail message
      * @return string
      */
-    public function getBody()
+    public function getBodyText()
     {
-        return $this->_body;
+        return $this->_bodyText;
     }
 
     /**
-     * Sets the email body
-     * @param string $body
-     * @return Zend_Service_Amazon_Ses_SendEmail
+     * Sets the text part of the mail message
+     * @param  string $bodyText
+     * @return Zend_Service_Amazon_Ses
      */
-    public function setBody($body)
+    public function setBodyText($bodyText, $charset = 'utf-8')
     {
-        $this->_body = $body;
+        $this->_bodyText = $bodyText;
+        $this->_bodyTextCharset = $charset;
         return $this;
     }
 
     /**
-     * Performs a request to AWS with all data supplied
+     * Returns the parameters needed to make a SendEmail request to SES
      * @return Zend_Service_Amazon_Ses_Response_SendEmail
      */
-    public function request()
+    public function getParams()
     {
         $params = array(
-            'Source' => $this->_source,
+            'Source' => $this->getFrom(),
             'Message.Subject.Data' => $this->getSubject(),
-            'Message.Body.Text.Data' => $this->getBody()
+            'Message.Body.Text.Data' => $this->getBodyText(),
+            'Message.Body.Html.Data' => $this->getBodyHtml()
         );
 
         $params = array_merge(
             $params, $this->_parameterizeRecipients()
         );
 
-        return $this->_sendRequest($params);
+        if (!empty($this->_returnPath)) {
+            $params['ReturnPath'] = $this->_returnPath;
+        }
+
+        return $params;
     }
-   
+
     /**
      * Converts array of recipients into format compatable for the SendEmail action
      * @return array
@@ -269,4 +369,21 @@ class Zend_Service_Amazon_Ses_SendEmail extends Zend_Service_Amazon_Ses_Abstract
 
         return $params;
     }
+
+    /**
+     * Converts the raw array of reply to addresses to a AWS compatable parameter set.
+     * @return array
+     */
+    protected function _parameterizeReplyTo()
+    {
+        $params = array();
+        foreach ($this->_replyTo as $k => $r) {
+            $key = 'ReplyToAddresses.member.' . ($k + 1);
+            $params[$key] = $r;
+        }
+
+        return $params;
+    }
+
+
 }
