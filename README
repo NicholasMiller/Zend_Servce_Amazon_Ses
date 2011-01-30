@@ -2,11 +2,15 @@ Zend_Service_Amazon_Ses
 
 Incubator for development of a new Zend Framework Simple Email Services component.
 
+The provided code implements all the Actions oulined on the official AWS SES documentation page:
+http://docs.amazonwebservices.com/ses/latest/APIReference/
+
 Usage:
 
 Globally Set Credentials
 =======================
 Zend_Service_Amazon_Ses::setKeys('aws-key', 'aws-secret-key');
+
 
 SendEmail:
 ========================
@@ -39,7 +43,14 @@ List Verified Email Addresses
 $ses = new Zend_Service_Amazon_Ses();
 $addresses = $ses->listVerifiedEmailAddresses();
 
+
 Get Quota Information
 =====================
 $ses = new Zend_Service_Amazon_Ses();
 $quotaArray = $ses->getSendQuota();
+
+
+Verify Email Address
+=====================
+$ses = new Zend_Service_Amazon_Ses();
+$ses->verifyEmailAddress();
