@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Amazon
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Ec2.php 20096 2010-01-06 02:05:09Z bkarwin $
+ * @version    $Id:$
  */
 
 /**
@@ -35,7 +35,46 @@ class Zend_Service_Amazon_Ses extends Zend_Service_Amazon_Abstract
     const XML_NAMESPACE = 'http://ses.amazonaws.com/doc/2010-12-01/';
     const ENDPOINT_URL  = 'https://email.us-east-1.amazonaws.com';
     const HTTP_TIMEOUT_SECONDS  = 10;
+
+    /**
+     * @var Zend_Uri_Http
+     */
+    protected $_endpoint;
     
+    /**
+     * Sets an alternative endpoint to the default
+     * 
+     * @param  Zend_Uri_Http $endpoint
+     * @return Zend_Service_Amazon_Ses
+     * @throws InvalidArgumentException If the provided endpoint url is not valid
+     */
+    public function setEndpoint(Zend_Uri_Http $endpoint)
+    {
+        $this->_endpoint = $endpoint;
+
+        if (!$endpoint->valid()) {
+            throw new InvalidArgumentException(sprintf(
+                'The provided url "%s" is not valid.', $endpoint->getUri()
+            ));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Gets the provided endpoint
+     * 
+     * @return Zend_Uri_Http
+     */
+    public function getEndpoint()
+    {
+        if (empty($this->_endpoint)) {
+            $this->_endpoint = Zend_Uri_Http::fromString(self::ENDPOINT_URL);
+        }
+        
+        return $this->_endpoint;
+    }
+
     /**
      * Verifies an email address.
      * This action causes a confirmation email message to be sent to the
@@ -70,6 +109,7 @@ class Zend_Service_Amazon_Ses extends Zend_Service_Amazon_Abstract
      * @param  string $from       (Optional) From email address, if not included in the raq email's headers.
      * @param  array  $recipients (Optional) Additional receipients to what's provided in the raw email's headers.
      * @return string AWS Message Id
+     * @throws RuntimeException   If the AWS repsonse is missing XML elements
      */
     public function sendRawEmail($message, $from = null, array $recipients = array())
     {
@@ -88,7 +128,7 @@ class Zend_Service_Amazon_Ses extends Zend_Service_Amazon_Abstract
         $xml = $this->_sendRequest('SendRawEmail', $params);
 
         if (!isset($xml->SendRawEmailResult->MessageId)) {
-            throw new Zend_Service_Amazon_Ses_Exception(
+            throw new RuntimeException(
                 'There was an unexpected error processing your AWS SendRawEmail request'
             );
         }
@@ -118,15 +158,14 @@ class Zend_Service_Amazon_Ses extends Zend_Service_Amazon_Abstract
      * 
      * @param  Zend_Service_Amazon_Ses_Email $email
      * @return string AWS Message Id
-     * @throws Zend_Service_Amazon_Ses_Exception If the AWS request did not
-     *                     return the properly formatted XML response.
+     * @throws RuntimeException If the AWS request did not return the properly formatted XML response.
      */
     public function sendEmail(Zend_Service_Amazon_Ses_Email $email)
     {
         $xml = $this->_sendRequest('SendEmail', $email->getParams());
 
         if (!isset($xml->SendEmailResult->MessageId)) {
-            throw new Zend_Service_Amazon_Ses_Exception(
+            throw new RuntimeException(
                 'There was an unexpected error processing your AWS SendEmail request'
             );
         }
@@ -149,13 +188,14 @@ class Zend_Service_Amazon_Ses extends Zend_Service_Amazon_Abstract
      *                  the previous 24 hours.
      *
      * @return array
+     * @throws RuntimeException If the AWS request did not return the properly formatted XML response.
      */
     public function getSendQuota()
     {
         $xml = $this->_sendRequest('GetSendQuota');
 
         if (!isset($xml->GetSendQuotaResult->SentLast24Hours)) {
-            throw new Zend_Service_Amazon_Ses_Exception(
+            throw new RuntimeException(
                 'There was an unexpected error processing your AWS GetSendQuota request'
             );
         }
@@ -199,9 +239,9 @@ class Zend_Service_Amazon_Ses extends Zend_Service_Amazon_Abstract
 
     }
 
-
     /**
      * Creates a signature from the provided date
+     * 
      * @param  string $data RFC2616-compliant date
      * @return string
      */
@@ -216,43 +256,33 @@ class Zend_Service_Amazon_Ses extends Zend_Service_Amazon_Abstract
         return base64_encode($hmac);
     }
 
-
     /**
      * Sends the assembled request to the
      * 
-     * @params string $action 
+     * @params string $action AWS action to be performed
      * @param  array  $params (Optional)
      * @return SimpleXMLElement
-     * @throws Zend_Service_Amazon_Ses_Exception if there was a
-     *                          miscommunication during the http request, or
-     *                          if aws returned an error message
+     * @throws Zend_Service_Amazon_Ses_Exception if there was a relayed error message from AWS
      */
     protected function _sendRequest($action, array $params = array())
     {
-        $url = self::ENDPOINT_URL;
         $params = array_merge($params, array('Action' => $action));
 
-        try {
-            /* @var $client Zend_Http_Client */
-            $client = self::getHttpClient();
-            $client->resetParameters();
+        /* @var $client Zend_Http_Client */
+        $client = self::getHttpClient();
+        $client->resetParameters();
 
-            $this->_addRequiredHeaders($client);
+        $this->_addRequiredHeaders($client);
 
-            $client->setConfig(array(
-                'timeout' => self::HTTP_TIMEOUT_SECONDS
-            ));
+        $client->setConfig(array(
+            'timeout' => self::HTTP_TIMEOUT_SECONDS
+        ));
 
-            $client->setUri($url);
-            $client->setMethod(Zend_Http_Client::POST);
-            $client->setParameterPost($params);
+        $client->setUri($this->getEndpoint());
+        $client->setMethod(Zend_Http_Client::POST);
+        $client->setParameterPost($params);
 
-            $response = $client->request();
-
-        } catch (Zend_Http_Client_Exception $e) {
-            $message = 'Error in request to AWS service: ' . $e->getMessage();
-            throw new Zend_Service_Amazon_Ses_Exception($message, $e->getCode(), $e);
-        }
+        $response = $client->request();
 
         $xml = new SimpleXMLElement($response->getBody());
         $xml->registerXPathNamespace('ses', self::XML_NAMESPACE);
