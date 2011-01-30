@@ -4,25 +4,42 @@ Incubator for development of a new Zend Framework Simple Email Services componen
 
 Usage:
 
+Globally Set Credentials
+=======================
+Zend_Service_Amazon_Ses::setKeys('aws-key', 'aws-secret-key');
+
 SendEmail:
 ========================
-$sendEmail = new Zend_Service_Amazon_Ses_SendEmail(
-    'awskey', 'aws-secret-key'
-);
+$email = new Zend_Service_Amazon_Ses_Email();
+$email->addTo('recipient@example.com')
+    ->setFrom('from-address@example.com', 'My Name')
+    ->setSubject('Subject')
+    ->setReturnPath('return-path-address@example.com')
+    ->setBodyText('Text part of email')
+    ->setBodyHtml('<b>Html part of email!</b>');
 
-$sendEmail->addTo('to-address@domain.tld', 'Some User')
-          ->setSource('from-email@example.com')
-          ->setSubject('This is a message')
-          ->setBody('Boom Boom Boom!!!')
-          ->request();
-
+$ses = new Zend_Service_Amazon_Ses();
+$messageId = $ses->sendEmail($email);
 
 
 SendRawEmail:
 ========================
-$sendRawEmail = new Zend_Service_Amazon_Ses_SendEmail(
-    'awskey', 'aws-secret-key'
-);
+$ses = new Zend_Service_Amazon_Ses();
+$messageId = $ses->setRawEmail('...full email text with headers...');
 
-$sendRawEmail->setRawEmail('...full email string with headers...')
-             ->request();
+
+Delete Verified Email:
+=======================
+$ses = new Zend_Service_Amazon_Ses();
+$ses->deleteVerifiedEmailAddress('email-address@example.com');
+
+
+List Verified Email Addresses
+======================
+$ses = new Zend_Service_Amazon_Ses();
+$addresses = $ses->listVerifiedEmailAddresses();
+
+Get Quota Information
+=====================
+$ses = new Zend_Service_Amazon_Ses();
+$quotaArray = $ses->getSendQuota();
