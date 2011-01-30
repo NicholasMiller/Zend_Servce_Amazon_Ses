@@ -15,13 +15,13 @@
  * @category   Zend
  * @package    Zend_Service
  * @subpackage Amazon
- * @copyright  Copyright (c) 2005-2010 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id: Ec2.php 20096 2010-01-06 02:05:09Z bkarwin $
+ * @version    $Id:$
  */
 
 /**
- * Amazon SES Service Class
+ * Encapsulates email data used for SES SendEmail action
  *
  * @category   Zend
  * @package    Zend_Service
@@ -133,7 +133,7 @@ class Zend_Service_Amazon_Ses_Email
     /**
      * Sets the Return Path
      * @param  string $returnPath Email Address
-     * @return Zend_Service_Amazon_Ses
+     * @return Zend_Service_Amazon_Ses_Email
      */
     public function setReturnPath($returnPath)
     {
@@ -154,7 +154,7 @@ class Zend_Service_Amazon_Ses_Email
      * Sets the From Address
      * @param  string $from RFC-822 Compliant Email Address
      * @param  string $name
-     * @return Zend_Service_Amazon_Ses
+     * @return Zend_Service_Amazon_Ses_Email
      */
     public function setFrom($from, $name = null)
     {
@@ -178,7 +178,7 @@ class Zend_Service_Amazon_Ses_Email
      * Add a TO address
      * @param  string $email
      * @param  string $name
-     * @return Zend_Service_Amazon_Ses
+     * @return Zend_Service_Amazon_Ses_Email
      */
     public function addTo($email, $name = null)
     {
@@ -193,7 +193,7 @@ class Zend_Service_Amazon_Ses_Email
      * 
      * @param  string $email Email Address
      * @param  string $name (Optional)
-     * @return Zend_Service_Amazon_Ses
+     * @return Zend_Service_Amazon_Ses_Email
      */
     public function addReplyTo($email, $name = null)
     {
@@ -206,7 +206,7 @@ class Zend_Service_Amazon_Ses_Email
      * 
      * @return array
      */
-    public function setReplyTo()
+    public function getReplyTo()
     {
         return $this->_replyTo;
     }
@@ -259,13 +259,13 @@ class Zend_Service_Amazon_Ses_Email
      * @param  string $email
      * @param  string $name
      * @param  string $part
-     * @throws Zend_Service_Amazon_Ses_Exception if email is invalid or part is not one of to, cc, bcc
      * @return void
+     * @throws InvalidArgumentException if email is invalid or part is not one of to, cc, bcc
      */
     protected function _addEmail($email, $name, $part)
     {
         if (!in_array($part, array('to', 'cc', 'bcc', 'replyto'))) {
-            throw new Zend_Service_Amazon_Ses_Exception(
+            throw new InvalidArgumentException(
                 '$part is not one of to, cc, bcc'
             );
         }
@@ -280,6 +280,7 @@ class Zend_Service_Amazon_Ses_Email
 
     /**
      * Clears all recipients
+     *
      * @return void
      */
     public function clearRecipients()
@@ -289,6 +290,7 @@ class Zend_Service_Amazon_Ses_Email
 
     /**
      * Gets the message subject
+     *
      * @return string
      */
     public function getSubject()
@@ -298,8 +300,9 @@ class Zend_Service_Amazon_Ses_Email
 
     /**
      * Sets the message subject
+     *
      * @param string $subject
-     * @return Zend_Service_Amazon_Ses
+     * @return Zend_Service_Amazon_Ses_Email
      */
     public function setSubject($subject)
     {
@@ -309,6 +312,7 @@ class Zend_Service_Amazon_Ses_Email
 
     /**
      * Gets the text part of the mail message
+     * 
      * @return string
      */
     public function getBodyText()
@@ -318,8 +322,9 @@ class Zend_Service_Amazon_Ses_Email
 
     /**
      * Sets the text part of the mail message
+     * 
      * @param  string $bodyText
-     * @return Zend_Service_Amazon_Ses
+     * @return Zend_Service_Amazon_Ses_Email
      */
     public function setBodyText($bodyText, $charset = 'utf-8')
     {
@@ -330,6 +335,7 @@ class Zend_Service_Amazon_Ses_Email
 
     /**
      * Returns the parameters needed to make a SendEmail request to SES
+     * 
      * @return Zend_Service_Amazon_Ses_Response_SendEmail
      */
     public function getParams()
@@ -369,21 +375,4 @@ class Zend_Service_Amazon_Ses_Email
 
         return $params;
     }
-
-    /**
-     * Converts the raw array of reply to addresses to a AWS compatable parameter set.
-     * @return array
-     */
-    protected function _parameterizeReplyTo()
-    {
-        $params = array();
-        foreach ($this->_replyTo as $k => $r) {
-            $key = 'ReplyToAddresses.member.' . ($k + 1);
-            $params[$key] = $r;
-        }
-
-        return $params;
-    }
-
-
 }
