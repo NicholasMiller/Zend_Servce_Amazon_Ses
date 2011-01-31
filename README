@@ -54,3 +54,10 @@ Verify Email Address
 =====================
 $ses = new Zend_Service_Amazon_Ses();
 $ses->verifyEmailAddress();
+
+
+Use included Mail Transport
+====================
+$ses = new Zend_Service_Amazon_Ses();
+$transport = new Zend_Mail_Transport_AmazonSes($ses);
+
