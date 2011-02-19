@@ -46,12 +46,6 @@ class Zend_Mail_Transport_AmazonSes extends Zend_Mail_Transport_Abstract
     protected $_ses;
 
     /**
-     * The values recongized by the constructor $options argument
-     * @var array
-     */
-    protected $_configOptions = array('accessKey', 'secretKey', 'endpoint');
-
-    /**
      * Constructor
      * Recongized $options keys are:
      * + accessKey: Amazon AWS Access key
