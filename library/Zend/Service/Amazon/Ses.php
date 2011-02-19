@@ -40,7 +40,24 @@ class Zend_Service_Amazon_Ses extends Zend_Service_Amazon_Abstract
      * @var Zend_Uri_Http
      */
     protected $_endpoint;
-    
+
+    /**
+     * Create Amazon SES client.
+     *
+     * @param  string        $access_key         (Optional) Override the default Access Key
+     * @param  string        $secret_key         (Optional) Override the default Secret Key
+     * @param  Zend_Uri_Http $endpoint  Endpoint (Optional) Endpoint Url
+     * @return void
+     */
+    public function __construct($accessKey = null, $secretKey = null, Zend_Uri_Http $endpoint = null)
+    {
+        parent::__construct($accessKey, $secretKey);
+
+        if (!is_null($endpoint)) {
+            $this->setEndpoint($endpoint);
+        }
+    }
+
     /**
      * Sets an alternative endpoint to the default
      * 
