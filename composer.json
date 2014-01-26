@@ -1,0 +1,12 @@
+{
+    "name": "zendframework/zend-service-amazon-ses",
+    "type": "library",
+    "description": "Zend_Service_Amazon_Ses is a Zend Framework <http://zendframework.com/> mailing service for Amazon Simple Email Service <http://aws.amazon.com/ses/>.",
+    "homepage": "http://framework.zend.com/",
+    "keywords": ["Zend Framework", "Amazon", "Simple Email Service"],
+    "license": "BSD-3-Clause",
+    "require": {
+        "php": ">=5.3.2",
+        "zendframework/zendframework1": "*"
+    }
+}
