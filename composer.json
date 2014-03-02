@@ -8,5 +8,10 @@
     "require": {
         "php": ">=5.3.2",
         "zendframework/zendframework1": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Zend_": "library/"
+        }
     }
 }
