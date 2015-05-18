@@ -6,7 +6,8 @@
     "keywords": ["Zend Framework", "Amazon", "Simple Email Service"],
     "license": "BSD-3-Clause",
     "require": {
-        "php": ">=5.3.2"
+        "php": ">=5.3.2",
+        "zf1/zend-service-amazon": "*"
     },
     "autoload": {
         "psr-0": {
