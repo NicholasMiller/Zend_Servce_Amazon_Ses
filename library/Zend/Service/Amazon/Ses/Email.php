@@ -391,6 +391,12 @@ class Zend_Service_Amazon_Ses_Email
             $params['ReturnPath'] = $this->_returnPath;
         }
 
+        if(!empty($this->_replyTo)){
+            foreach($this->_replyTo as $i => $replyTo){
+                $params['ReplyToAddresses.member.' . ($i + 1)] = $replyTo;
+            }
+        }
+        
         return $params;
     }
 
