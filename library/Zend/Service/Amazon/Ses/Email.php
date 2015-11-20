@@ -300,9 +300,9 @@ class Zend_Service_Amazon_Ses_Email
      */
     protected function _addEmail($email, $name, $part)
     {
-        if (!in_array($part, array('to', 'cc', 'bcc', 'replyto'))) {
+        if (!in_array($part, array('to', 'cc', 'bcc', 'replyTo'))) {
             throw new InvalidArgumentException(
-                '$part is not one of to, cc, bcc'
+                '$part is not one of to, cc, bcc, replyTo'
             );
         }
 
