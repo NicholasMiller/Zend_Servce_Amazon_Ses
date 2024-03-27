@@ -292,6 +292,14 @@ class Zend_Service_Amazon_Ses_Email
 
     /**
      *
+     * According with RFC 3696 if the local part of an email address contains commas they must be quoted:
+     * "Any ASCII graphic (printing) character other than the at-sign ("@"), backslash, double quote, comma, or square
+     * brackets may appear without quoting. If any of that list of excluded characters are to appear, they must be quoted."
+     * 
+     * So the correct version of the email address is: "John Smith, Jr." <johnsmith@example.com>
+     * 
+     * @link https://tools.ietf.org/html/rfc3696
+     * @link https://forums.aws.amazon.com/message.jspa?messageID=219047
      * @param  string $email
      * @param  string $name
      * @param  string $part
@@ -300,16 +308,16 @@ class Zend_Service_Amazon_Ses_Email
      */
     protected function _addEmail($email, $name, $part)
     {
-        if (!in_array($part, array('to', 'cc', 'bcc', 'replyto'))) {
+        if (!in_array($part, array('to', 'cc', 'bcc', 'replyTo'))) {
             throw new InvalidArgumentException(
-                '$part is not one of to, cc, bcc'
+                '$part is not one of to, cc, bcc, replyTo'
             );
         }
 
         $property = "_{$part}";
         $this->{$property}[] = sprintf(
             '%s<%s>',
-            !empty($name) ? $name . ' ' : '',
+            !empty($name) ? '"' . $name . '" ' : '',  //Wrap name between double quotes to prevent problems when the name contains comma's
             $email
         );
     }
@@ -391,6 +399,12 @@ class Zend_Service_Amazon_Ses_Email
             $params['ReturnPath'] = $this->_returnPath;
         }
 
+        if(!empty($this->_replyTo)){
+            foreach($this->_replyTo as $i => $replyTo){
+                $params['ReplyToAddresses.member.' . ($i + 1)] = $replyTo;
+            }
+        }
+        
         return $params;
     }
 
